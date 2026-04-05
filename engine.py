@@ -78,6 +78,7 @@ def iter_set_there_BFS(
         return
 
     for char in PICKABLE:
+        # Skippa om vi har en bokstav som definitivt inte är valbar här.
         if char in SURE_CHARS and char not in POSSIBLY_THERE[char_num]:
             continue
         new_set_chars = set_chars.copy()
@@ -152,11 +153,26 @@ def rank_and_remove_uncommon(word_list):
     return likely_words
 
 
+def solve_wordle(used_str: str, yellow_dict: dict):
+    # 1. Formatera rådata från GUI
+    used = set(used_str.lower())
+    pickable = get_pickable(used)
+    included_chars = get_unique(yellow_dict)
+    pos_there = get_possibly_there(yellow_dict, included_chars)
+
+    # 2. Anropa din befintliga Solve-funktion
+    word_list = Solve(pickable, pos_there, included_chars)
+
+    likely_words = rank_and_remove_uncommon(word_list)
+
+    return likely_words
+
+
 if __name__ == "__main__":
     # INPUT
-    used = set("spirathwdmlj")
+    used = set("spirathwdml")
     pickable = get_pickable(used)
-    not_there = {1: "nyo", 2: "yeo", 3: "oyen", 4: "nye", 5: "noe"}
+    not_there = {1: "no", 2: "oe", 3: "on", 4: "e", 5: "oe"}
     included_chars = get_unique(not_there)
     POSSIBLY_THERE = get_possibly_there(not_there, included_chars)
 
