@@ -2,3 +2,4 @@
 shell.nix
 .envrc
 __pycache__/
+*.py[cod]
