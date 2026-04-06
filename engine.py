@@ -3,7 +3,6 @@ import re
 
 # Skriv in använda
 def get_pickable(used: set) -> set:
-
     characters = set("abcdefghijklmnopqrstuvwxyz")
     pickable = characters.difference(used)
     return pickable
@@ -48,7 +47,7 @@ def only_possible_here(
     return True
 
 
-def iter_set_there_BFS(
+def iter_set_there_DFS(
     char_num: int,  # Eg djup
     POSSIBLY_THERE: dict[int, list[str]],
     PICKABLE: set[str],
@@ -70,7 +69,7 @@ def iter_set_there_BFS(
     if len(only_possible_here_list) == 1:
         new_set_chars = set_chars.copy()
         new_set_chars[char_num] = only_possible_here_list[0]  # Måste vara här
-        iter_set_there_BFS(
+        iter_set_there_DFS(
             char_num + 1, POSSIBLY_THERE, PICKABLE, new_set_chars, word_list, SURE_CHARS
         )
         return
@@ -83,14 +82,14 @@ def iter_set_there_BFS(
             continue
         new_set_chars = set_chars.copy()
         new_set_chars[char_num] = char  # Måste vara här
-        iter_set_there_BFS(
+        iter_set_there_DFS(
             char_num + 1, POSSIBLY_THERE, PICKABLE, new_set_chars, word_list, SURE_CHARS
         )
 
 
 def Solve(pickable: set, POSSIBLY_THERE: dict, SURE_CHARS: set):
     possible_words = []
-    iter_set_there_BFS(
+    iter_set_there_DFS(
         1,
         POSSIBLY_THERE,
         pickable,
@@ -114,7 +113,6 @@ def format_regex(lista, mode="uncommon"):
 
 
 def is_unlikely(w: str, UNCOMMON_NEIGHBOURS, UNCOMMON_START, UNCOMMON_END) -> bool:
-
     if re.search(UNCOMMON_START, w):
         return True
     # 2. Ogiltigt slut
