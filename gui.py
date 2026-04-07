@@ -15,7 +15,7 @@ class App(ctk.CTk):
         self.geometry("800x1000")
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(5, weight=1)
 
         # 2. Komponenter med JÄTTE-text
         # Titel
@@ -30,9 +30,25 @@ class App(ctk.CTk):
         )
         self.used_input.grid(row=1, column=0, padx=50, pady=15, sticky="ew")
 
+        # Gröna bokstäver
+        self.green_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.green_frame.grid(row=2, column=0, pady=10)
+        self.greens = []
+        for i in range(5):
+            e = ctk.CTkEntry(
+                self.green_frame,
+                width=100,
+                height=100,
+                font=("Arial", 32, "bold"),
+                justify="center",
+                fg_color="#1e5230",  # A shade of green
+            )
+            e.grid(row=0, column=i, padx=10)
+            self.greens.append(e)
+
         # Gula bokstäver
         self.yellow_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.yellow_frame.grid(row=2, column=0, pady=30)
+        self.yellow_frame.grid(row=3, column=0, pady=10)
 
         self.yellows = []
         for i in range(5):
@@ -42,6 +58,7 @@ class App(ctk.CTk):
                 height=100,
                 font=("Arial", 32, "bold"),
                 justify="center",
+                fg_color="#6b7026",  # A shade of yellow
             )
             e.grid(row=0, column=i, padx=10)
             self.yellows.append(e)
@@ -55,15 +72,16 @@ class App(ctk.CTk):
             font=("Arial", 28, "bold"),
             fg_color="#27ae60",
         )
-        self.solve_btn.grid(row=3, column=0, padx=50, pady=40, sticky="ew")
+        self.solve_btn.grid(row=4, column=0, padx=50, pady=20, sticky="ew")
 
         # Resultat
         self.res = ctk.CTkTextbox(self, font=("Consolas", 22), border_width=2)
-        self.res.grid(row=4, column=0, padx=50, pady=(0, 50), sticky="nsew")
+        self.res.grid(row=5, column=0, padx=50, pady=(0, 50), sticky="nsew")
 
     def calculate(self):
+        green_data = {i + 1: self.greens[i].get().lower() for i in range(5)}
         yellow_data = {i + 1: self.yellows[i].get().lower() for i in range(5)}
-        results = solve_wordle(self.used_input.get(), yellow_data)
+        results = solve_wordle(self.used_input.get(), yellow_data, green_data)
 
         self.res.delete("1.0", "end")
         if not results:

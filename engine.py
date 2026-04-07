@@ -105,11 +105,11 @@ def format_regex(lista, mode="uncommon"):
     mid_seperated = "|".join(sorted(set(lista)))
 
     if mode == "start":
-        return f"r'^({mid_seperated})'"
+        return f"^({mid_seperated})"
     elif mode == "end":
-        return f"r'({mid_seperated})$'"
+        return f"({mid_seperated})$"
     else:
-        return f"r'({mid_seperated})'"
+        return f"({mid_seperated})"
 
 
 def is_unlikely(w: str, UNCOMMON_NEIGHBOURS, UNCOMMON_START, UNCOMMON_END) -> bool:
@@ -136,6 +136,14 @@ def is_unlikely(w: str, UNCOMMON_NEIGHBOURS, UNCOMMON_START, UNCOMMON_END) -> bo
     return False
 
 
+def rm_with_non_green(words: list, greens: dict) -> list:
+    # Effektiv filtrering med list comprehension
+    for num, char in greens.items():
+        if char:
+            words = [w for w in words if w[num - 1] == char]
+    return words
+
+
 def rank_and_remove_uncommon(word_list):
     # Remove uncommon pairs
     with open("uncommon_neighbours.txt", "r", encoding="utf-8") as f:
@@ -143,7 +151,7 @@ def rank_and_remove_uncommon(word_list):
     UNCOMMON_NEIGHBOURS = format_regex(UNCOMMON_NEIGHBOURS)
 
     UNCOMMON_START = r"^(jb|jc|jd|jf|jg|jh|jj|jk|jl|jm|jn|jp|jq|jr|js|jt|jv|jw|jx|jy|jz|kz|qb|qc|qd|qe|qf|qg|qh|qj|qk|ql|qm|qn|qo|qp|qr|qs|qt|qv|qw|qx|qy|qz|vb|vc|vd|vf|vg|vh|vj|vk|vl|vm|vn|vp|vq|vr|vs|vt|vw|vx|vy|vz|xb|xc|xd|xf|xg|xh|xj|xk|xl|xm|xn|xp|xq|xr|xs|xt|xv|xw|xy|xz|zb|zc|zd|zeo|zf|zg|zh|zj|zk|zl|zm|zn|zp|zq|zr|zs|zt|zv|zw|zx|zy)"
-    UNCOMMON_END = r"(aa|ii|uu|uo|eo|bk|cb|cx|dx|fv|hg|iy|jh|vj|vk|vl|vm|vn|vp|vq|vr|vs|vt|vw|vx|vy|vz|wj|wm|wn|wp|wq|wx|wy|wz|xj|zk|zl|zm|zn|zp|zq|zr|zs|zt|zv|zw|zx|q|j|v|b|c)$"
+    UNCOMMON_END = r"(aa|ii|uu|uo|eo|bk|cb|cx|dx|fv|hg|iy|jh|vj|vk|vl|vm|vn|vp|vq|vr|vs|vt|vw|vx|vz|wj|wm|wp|wq|wx|wz|xj|zk|zl|zm|zn|zp|zq|zr|zs|zt|zv|zw|zx|q|j|v)$"
     likely_words = []
     for word in word_list:
         if not is_unlikely(word, UNCOMMON_NEIGHBOURS, UNCOMMON_START, UNCOMMON_END):
@@ -151,7 +159,7 @@ def rank_and_remove_uncommon(word_list):
     return likely_words
 
 
-def solve_wordle(used_str: str, yellow_dict: dict):
+def solve_wordle(used_str: str, yellow_dict: dict, greens_dict: dict):
     # 1. Formatera rådata från GUI
     used = set(used_str.lower())
     pickable = get_pickable(used)
@@ -161,6 +169,8 @@ def solve_wordle(used_str: str, yellow_dict: dict):
     # 2. Anropa din befintliga Solve-funktion
     word_list = Solve(pickable, pos_there, included_chars)
 
+    word_list = rm_with_non_green(word_list, greens_dict)
+
     likely_words = rank_and_remove_uncommon(word_list)
 
     return likely_words
@@ -168,14 +178,20 @@ def solve_wordle(used_str: str, yellow_dict: dict):
 
 if __name__ == "__main__":
     # INPUT
-    used = set("spirathwdml")
+    used = set("aiuhorlg")
     pickable = get_pickable(used)
-    not_there = {1: "no", 2: "oe", 3: "on", 4: "e", 5: "oe"}
+
+    # All yellows
+    not_there = {1: "", 2: "d", 3: "d", 4: "d", 5: ""}
+    greens = {1: "", 2: "e", 3: "", 4: "", 5: "e"}
+
     included_chars = get_unique(not_there)
     POSSIBLY_THERE = get_possibly_there(not_there, included_chars)
 
-    word_list = Solve(pickable, POSSIBLY_THERE, included_chars)
-    likely_words = rank_and_remove_uncommon(word_list)
+    words = Solve(pickable, POSSIBLY_THERE, included_chars)
+    words = rm_with_non_green(words, greens)
+
+    likely_words = rank_and_remove_uncommon(words)
     cols = 8
 
     rows = [likely_words[i : i + cols] for i in range(0, len(likely_words), cols)]
